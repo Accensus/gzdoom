@@ -121,6 +121,7 @@ extern AActor *P_SpawnMapThing (FMapThing *mthing, int position);
 extern void P_TranslateTeleportThings (void);
 
 void P_ParseTextMap(MapData *map, FMissingTextureTracker &);
+void P_LoadLightmaps(MapData *map);
 
 extern int numinterpolations;
 extern unsigned int R_OldBlend;
@@ -196,6 +197,12 @@ static int GetMapIndex(const char *mapname, int lastindex, const char *lumpname,
 		{"REJECT",	 false},
 		{"BLOCKMAP", false},
 		{"BEHAVIOR", false},
+		{"",		 false},
+		{"LM_CELLS", false},
+		{"LM_SUN",	 false},
+		{"LM_SURFS", false},
+		{"LM_TXCRD", false},
+		{"LM_LMAPS", false},
 		//{"SCRIPTS",	 false},
 	};
 
@@ -360,6 +367,26 @@ MapData *P_OpenMapData(const char * mapname, bool justcheck)
 					{
 						index = ML_BEHAVIOR;
 						map->HasBehavior = true;
+					}
+					else if (!stricmp(lumpname, "LM_CELLS"))
+					{
+						index = ML_LM_CELLS;
+					}
+					else if (!stricmp(lumpname, "LM_SUN"))
+					{
+						index = ML_LM_SUN;
+					}
+					else if (!stricmp(lumpname, "LM_SURFS"))
+					{
+						index = ML_LM_SURFS;
+					}
+					else if (!stricmp(lumpname, "LM_TXCRD"))
+					{
+						index = ML_LM_TXCRD;
+					}
+					else if (!stricmp(lumpname, "LM_LMAPS"))
+					{
+						index = ML_LM_LMAPS;
 					}
 					else if (!stricmp(lumpname, "ENDMAP"))
 					{
@@ -3909,6 +3936,11 @@ void P_SetupLevel (const char *lumpname, int position)
 				level.segs.Clear();
 				level.nodes.Clear();
 			}
+
+			if (!ForceNodeBuild && map->Size(ML_LM_LMAPS) != 0)
+			{
+				P_LoadLightmaps(map);
+			}
 		}
 		else if (!map->isText)	// regular nodes are not supported for text maps
 		{
@@ -4279,6 +4311,109 @@ void P_SetupLevel (const char *lumpname, int position)
 	memcpy(&level.loadlines[0], &level.lines[0], level.lines.Size() * sizeof(level.lines[0]));
 	level.loadsides.Resize(level.sides.Size());
 	memcpy(&level.loadsides[0], &level.sides[0], level.sides.Size() * sizeof(level.sides[0]));
+}
+
+void P_LoadLightmaps(MapData *map)
+{
+	if (map->Size(ML_LM_CELLS))
+	{
+		FileReader &fr = map->Reader(ML_LM_CELLS);
+		int numLightGrids = fr.ReadInt32();
+		level.NumLMCells = numLightGrids;
+		level.LMCellMin[0] = fr.ReadInt16();
+		level.LMCellMin[1] = fr.ReadInt16();
+		level.LMCellMin[2] = fr.ReadInt16();
+		level.LMCellMax[0] = fr.ReadInt16();
+		level.LMCellMax[1] = fr.ReadInt16();
+		level.LMCellMax[2] = fr.ReadInt16();
+		level.LMCellSize[0] = fr.ReadInt16();
+		level.LMCellSize[1] = fr.ReadInt16();
+		level.LMCellSize[2] = fr.ReadInt16();
+		level.LMCellBlock[0] = fr.ReadInt16();
+		level.LMCellBlock[1] = fr.ReadInt16();
+		level.LMCellBlock[2] = fr.ReadInt16();
+
+		TArray<uint8_t> marked(numLightGrids);
+
+		if (numLightGrids > 0)
+			fr.Read(&marked[0], numLightGrids);
+
+		int numMarked = 0;
+		for (int i = 0; i < numLightGrids; i++)
+		{
+			if (marked[i])
+				numMarked++;
+		}
+
+		TArray<uint8_t> colors(numMarked * 3);
+		TArray<uint8_t> sunShadows(numMarked);
+
+		if (numMarked > 0)
+		{
+			fr.Read(&colors[0], numMarked * 3);
+			fr.Read(&sunShadows[0], numMarked);
+		}
+
+		level.LMCellMarked.Resize(numLightGrids);
+		level.LMCellColor.Resize(numLightGrids);
+		level.LMCellSunShadow.Resize(numLightGrids);
+
+		int offset = 0;
+		for (int i = 0; i < numLightGrids; i++)
+		{
+			level.LMCellMarked[i] = !!marked[i];
+			if (marked[i])
+			{
+				level.LMCellColor[i].r = colors[offset * 3];
+				level.LMCellColor[i].g = colors[offset * 3 + 1];
+				level.LMCellColor[i].b = colors[offset * 3 + 2];
+				level.LMCellColor[i].a = 255;
+				level.LMCellSunShadow[i] = !!sunShadows[offset];
+				offset++;
+			}
+		}
+	}
+
+	if (map->Size(ML_LM_SUN) == sizeof(float) * 3)
+	{
+		FileReader &fr = map->Reader(ML_LM_SUN);
+		fr.Read(&level.LMSunDirection.X, 3 * sizeof(float));
+	}
+
+	if (map->Size(ML_LM_SURFS))
+	{
+		int count = (int)(map->Size(ML_LM_SURFS) / sizeof(LightmapSurface));
+		level.LMSurfaces.Resize(count);
+		if (count > 0)
+		{
+			FileReader &fr = map->Reader(ML_LM_SURFS);
+			fr.Read(&level.LMSurfaces[0], count * sizeof(LightmapSurface));
+		}
+	}
+
+	if (map->Size(ML_LM_TXCRD))
+	{
+		int count = (int)(map->Size(ML_LM_TXCRD) / sizeof(float));
+		level.LMTexCoords.Resize(count);
+		if (count > 0)
+		{
+			FileReader &fr = map->Reader(ML_LM_TXCRD);
+			fr.Read(&level.LMTexCoords[0], count * sizeof(float));
+		}
+	}
+
+	if (map->Size(ML_LM_LMAPS))
+	{
+		FileReader &fr = map->Reader(ML_LM_LMAPS);
+		int numTextures = fr.ReadInt32();
+		level.LMTexWidth = fr.ReadInt32();
+		level.LMTexHeight = fr.ReadInt32();
+
+		int size = level.LMTexWidth * level.LMTexHeight * numTextures;
+		level.LMTextures.Resize(size);
+		if (size > 0)
+			fr.Read(&level.LMTextures[0], size);
+	}
 }
 
 

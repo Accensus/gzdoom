@@ -1499,6 +1499,20 @@ struct FMiniBSP
 	TArray<vertex_t> Verts;
 };
 
+
+// Lightmap data
+
+struct LightmapSurface
+{
+	uint16_t Type;
+	uint16_t TypeIndex;
+	uint16_t LightmapNum;
+	uint16_t NumVerts;
+	uint32_t FirstVertex;
+};
+
+
+
 //
 // OTHER TYPES
 //

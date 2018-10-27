@@ -86,6 +86,22 @@ struct FLevelLocals
 	TArray<FSectorPortal> sectorPortals;
 	TArray<FLinePortal> linePortals;
 
+	// Lightmaps
+	int NumLMCells = 0;
+	int LMCellMin[3] = { 0, 0, 0 };
+	int LMCellMax[3] = { 0, 0, 0 };
+	int LMCellSize[3] = { 0, 0, 0 };
+	int LMCellBlock[3] = { 0, 0, 0 };
+	TArray<bool> LMCellMarked;
+	TArray<PalEntry> LMCellColor;
+	TArray<bool> LMCellSunShadow;
+	FVector3 LMSunDirection;
+	TArray<LightmapSurface> LMSurfaces;
+	TArray<float> LMTexCoords;
+	int LMTexWidth = 0;
+	int LMTexHeight = 0;
+	TArray<uint8_t> LMTextures;
+
 	// Portal information.
 	FDisplacementTable Displacements;
 	FPortalBlockmap PortalBlockmap;

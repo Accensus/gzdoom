@@ -61,7 +61,12 @@ enum
 	ML_BLOCKMAP,		// LUT, motion clipping, walls/grid element
 	ML_BEHAVIOR,		// [RH] Hexen-style scripts. If present, THINGS
 						//		and LINEDEFS are also Hexen-style.
-	ML_CONVERSATION,	// Strife dialog (only for TEXTMAP format)
+	ML_CONVERSATION,	// Strife dialog (only for TEXTMAP format),
+	ML_LM_CELLS,		// Strife lightmap cells
+	ML_LM_SUN,			// Strife lightmap sun
+	ML_LM_SURFS,		// Strife lightmap surfaces
+	ML_LM_TXCRD,		// Strife lightmap texture coordinates
+	ML_LM_LMAPS,		// Strife lightmap textures
 	ML_MAX,
 
 	// [RH] These are compressed (and extended) nodes. They combine the data from
