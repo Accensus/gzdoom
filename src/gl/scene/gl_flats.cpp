@@ -115,6 +115,20 @@ void FDrawInfo::DrawSubsector(GLFlat *flat, subsector_t * sub)
 {
 	if (gl.buffermethod != BM_DEFERRED)
 	{
+		float *lightuv = nullptr;
+		float lindex = -1.0f;
+		int ldir = 2;
+		if (sub->lightmap)
+		{
+			lightuv = &level.LMTexCoords[sub->lightmap->FirstVertex];
+			lindex = (float)sub->lightmap->LightmapNum;
+			if (sub->lightmap->Type == ST_FLOOR)
+			{
+				lightuv += sub->numlines * 2 - 2;
+				ldir = -2;
+			}
+		}
+
 		FFlatVertex *ptr = GLRenderer->mVBO->GetBuffer();
 		for (unsigned int k = 0; k < sub->numlines; k++)
 		{
@@ -124,6 +138,13 @@ void FDrawInfo::DrawSubsector(GLFlat *flat, subsector_t * sub)
 			ptr->y = vt->fY();
 			ptr->u = vt->fX() / 64.f;
 			ptr->v = -vt->fY() / 64.f;
+			if (lightuv)
+			{
+				ptr->lu = lightuv[0];
+				ptr->lv = lightuv[1];
+				lightuv += ldir;
+			}
+			ptr->lindex = lindex;
 			ptr++;
 		}
 		GLRenderer->mVBO->RenderCurrent(ptr, GL_TRIANGLE_FAN);
@@ -213,7 +234,7 @@ void FDrawInfo::DrawSubsectors(GLFlat *flat, int pass, bool processlights, bool 
 	gl_RenderState.Apply();
 	auto iboindex = flat->iboindex;
 
-	if (iboindex >= 0)
+	if (iboindex >= 0 && !flat->sector->HasLightmaps)
 	{
 		if (vcount > 0 && !ClipLineShouldBeActive())
 		{

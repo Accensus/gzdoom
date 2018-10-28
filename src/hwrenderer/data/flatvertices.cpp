@@ -94,6 +94,7 @@ void FFlatVertex::SetFlatVertex(vertex_t *vt, const secplane_t & plane)
 	z = (float)plane.ZatPoint(vt);
 	u = (float)vt->fX()/64.f;
 	v = -(float)vt->fY()/64.f;
+	lindex = -1.0f;
 }
 
 //==========================================================================

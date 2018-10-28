@@ -62,6 +62,7 @@ void FSkyVertexBuffer::BindVBO()
 	glEnableVertexAttribArray(VATTR_COLOR);
 	glDisableVertexAttribArray(VATTR_VERTEX2);
 	glDisableVertexAttribArray(VATTR_NORMAL);
+	glDisableVertexAttribArray(VATTR_LIGHTMAP);
 }
 
 //-----------------------------------------------------------------------------

@@ -160,6 +160,23 @@ void FGLRenderer::ResetSWScene()
 void FGLRenderer::SetupLevel()
 {
 	mVBO->CreateVBO();
+
+	if (level.LMTextures.Size() > 0)
+	{
+		GLint activeTex = 0;
+		glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTex);
+		glActiveTexture(GL_TEXTURE0 + 17);
+
+		if (mLightMapID == 0)
+			glGenTextures(1, (GLuint*)&mLightMapID);
+
+		glBindTexture(GL_TEXTURE_2D_ARRAY, mLightMapID);
+		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, level.LMTexWidth, level.LMTexHeight, level.LMTexCount, 0, GL_RGB, GL_UNSIGNED_BYTE, &level.LMTextures[0]);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glActiveTexture(activeTex);
+	}
 }
 
 //===========================================================================

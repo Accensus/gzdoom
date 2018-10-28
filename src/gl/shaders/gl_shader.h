@@ -34,7 +34,8 @@ enum
 	VATTR_TEXCOORD = 1,
 	VATTR_COLOR = 2,
 	VATTR_VERTEX2 = 3,
-	VATTR_NORMAL = 4
+	VATTR_NORMAL = 4,
+	VATTR_LIGHTMAP = 5
 };
 
 class FShaderCollection;

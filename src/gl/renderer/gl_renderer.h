@@ -73,6 +73,7 @@ public:
 	FCustomPostProcessShaders *mCustomPostProcessShaders = nullptr;
 
 	FShadowMap mShadowMap;
+	int mLightMapID = 0;
 
 	//FRotator mAngles;
 

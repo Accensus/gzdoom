@@ -182,6 +182,7 @@ void FModelVertexBuffer::BindVBO()
 	glEnableVertexAttribArray(VATTR_VERTEX2);
 	glEnableVertexAttribArray(VATTR_NORMAL);
 	glDisableVertexAttribArray(VATTR_COLOR);
+	glDisableVertexAttribArray(VATTR_LIGHTMAP);
 }
 
 //===========================================================================
