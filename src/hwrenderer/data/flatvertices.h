@@ -42,6 +42,17 @@ struct FFlatVertex
 		v = vv;
 		lindex = -1.0f;
 	}
+	void Set(float xx, float zz, float yy, float uu, float vv, float llu, float llv, float llindex)
+	{
+		x = xx;
+		z = zz;
+		y = yy;
+		u = uu;
+		v = vv;
+		lu = llu;
+		lv = llv;
+		lindex = llindex;
+	}
 };
 
 class FFlatVertexGenerator

@@ -113,22 +113,23 @@ void FDrawInfo::SetupSectorLights(GLFlat *flat, int pass, int *dli)
 
 void FDrawInfo::DrawSubsector(GLFlat *flat, subsector_t * sub)
 {
+	float *lightuv = nullptr;
+	float lindex = -1.0f;
+	int ldir = 2;
+	LightmapSurface *lightmap = sub->lightmap[flat->ceiling];
+	if (lightmap)
+	{
+		lightuv = &level.LMTexCoords[lightmap->FirstVertex];
+		lindex = (float)lightmap->LightmapNum;
+		if (lightmap->Type == ST_FLOOR)
+		{
+			lightuv += sub->numlines * 2 - 2;
+			ldir = -2;
+		}
+	}
+
 	if (gl.buffermethod != BM_DEFERRED)
 	{
-		float *lightuv = nullptr;
-		float lindex = -1.0f;
-		int ldir = 2;
-		if (sub->lightmap)
-		{
-			lightuv = &level.LMTexCoords[sub->lightmap->FirstVertex];
-			lindex = (float)sub->lightmap->LightmapNum;
-			if (sub->lightmap->Type == ST_FLOOR)
-			{
-				lightuv += sub->numlines * 2 - 2;
-				ldir = -2;
-			}
-		}
-
 		FFlatVertex *ptr = GLRenderer->mVBO->GetBuffer();
 		for (unsigned int k = 0; k < sub->numlines; k++)
 		{
@@ -166,7 +167,15 @@ void FDrawInfo::DrawSubsector(GLFlat *flat, subsector_t * sub)
 			for (unsigned int x = 0; x < 4; x++)
 			{
 				vertex_t *vt = sub->firstline[vi[x]].v1;
-				qd.Set(x, vt->fX(), flat->plane.plane.ZatPoint(vt) + flat->dz, vt->fY(), vt->fX() / 64.f, -vt->fY() / 64.f);
+				if (lightuv)
+				{
+					qd.Set(x, vt->fX(), flat->plane.plane.ZatPoint(vt) + flat->dz, vt->fY(), vt->fX() / 64.f, -vt->fY() / 64.f, lightuv[0], lightuv[1], lindex);
+					lightuv += ldir;
+				}
+				else
+				{
+					qd.Set(x, vt->fX(), flat->plane.plane.ZatPoint(vt) + flat->dz, vt->fY(), vt->fX() / 64.f, -vt->fY() / 64.f);
+				}
 			}
 			qd.Render(GL_TRIANGLE_FAN);
 		}

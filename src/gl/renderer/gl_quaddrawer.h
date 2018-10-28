@@ -31,6 +31,10 @@ public:
 	{
 		p[ndx].Set(x, y, z, s, t);
 	}
+	void Set(int ndx, float x, float y, float z, float s, float t, float lu, float lv, float lindex)
+	{
+		p[ndx].Set(x, y, z, s, t, lu, lv, lindex);
+	}
 	void Render(int type)
 	{
 		if (gl.buffermethod == BM_DEFERRED)

@@ -25,6 +25,7 @@
 #include "hwrenderer/data/flatvertices.h"
 #include "hwrenderer/scene/hw_drawinfo.h"
 #include "hwrenderer/scene/hw_drawstructs.h"
+#include "g_levellocals.h"
 
 EXTERN_CVAR(Bool, gl_seamless)
 
@@ -172,20 +173,47 @@ void GLWall::SplitRightEdge(FFlatVertex *&ptr)
 
 int GLWall::CreateVertices(FFlatVertex *&ptr, bool split)
 {
-	auto oo = ptr;
-	ptr->Set(glseg.x1, zbottom[0], glseg.y1, tcs[LOLFT].u, tcs[LOLFT].v);
-	ptr++;
-	if (split && glseg.fracleft == 0) SplitLeftEdge(ptr);
-	ptr->Set(glseg.x1, ztop[0], glseg.y1, tcs[UPLFT].u, tcs[UPLFT].v);
-	ptr++;
-	if (split && !(flags & GLWF_NOSPLITUPPER && seg->sidedef->numsegs > 1)) SplitUpperEdge(ptr);
-	ptr->Set(glseg.x2, ztop[1], glseg.y2, tcs[UPRGT].u, tcs[UPRGT].v);
-	ptr++;
-	if (split && glseg.fracright == 1) SplitRightEdge(ptr);
-	ptr->Set(glseg.x2, zbottom[1], glseg.y2, tcs[LORGT].u, tcs[LORGT].v);
-	ptr++;
-	if (split && !(flags & GLWF_NOSPLITLOWER) && seg->sidedef->numsegs > 1) SplitLowerEdge(ptr);
-	return int(ptr - oo);
+	LightmapSurface *lightmap = nullptr;
+	if (seg && type >= RENDERWALL_TOP && type <= RENDERWALL_BOTTOM)
+		lightmap = seg->lightmap[type - RENDERWALL_TOP];
+
+	if (lightmap)
+	{
+		float *lightuv = &level.LMTexCoords[lightmap->FirstVertex];
+		float lindex = (float)lightmap->LightmapNum;
+
+		auto oo = ptr;
+		ptr->Set(glseg.x1, zbottom[0], glseg.y1, tcs[LOLFT].u, tcs[LOLFT].v, lightuv[0], lightuv[1], lindex);
+		ptr++; lightuv += 2;
+		if (split && glseg.fracleft == 0) SplitLeftEdge(ptr);
+		ptr->Set(glseg.x1, ztop[0], glseg.y1, tcs[UPLFT].u, tcs[UPLFT].v, lightuv[0], lightuv[1], lindex);
+		ptr++; lightuv += 2;
+		if (split && !(flags & GLWF_NOSPLITUPPER && seg->sidedef->numsegs > 1)) SplitUpperEdge(ptr);
+		ptr->Set(glseg.x2, ztop[1], glseg.y2, tcs[UPRGT].u, tcs[UPRGT].v, lightuv[0], lightuv[1], lindex);
+		ptr++; lightuv += 2;
+		if (split && glseg.fracright == 1) SplitRightEdge(ptr);
+		ptr->Set(glseg.x2, zbottom[1], glseg.y2, tcs[LORGT].u, tcs[LORGT].v, lightuv[0], lightuv[1], lindex);
+		ptr++; lightuv += 2;
+		if (split && !(flags & GLWF_NOSPLITLOWER) && seg->sidedef->numsegs > 1) SplitLowerEdge(ptr);
+		return int(ptr - oo);
+	}
+	else
+	{
+		auto oo = ptr;
+		ptr->Set(glseg.x1, zbottom[0], glseg.y1, tcs[LOLFT].u, tcs[LOLFT].v);
+		ptr++;
+		if (split && glseg.fracleft == 0) SplitLeftEdge(ptr);
+		ptr->Set(glseg.x1, ztop[0], glseg.y1, tcs[UPLFT].u, tcs[UPLFT].v);
+		ptr++;
+		if (split && !(flags & GLWF_NOSPLITUPPER && seg->sidedef->numsegs > 1)) SplitUpperEdge(ptr);
+		ptr->Set(glseg.x2, ztop[1], glseg.y2, tcs[UPRGT].u, tcs[UPRGT].v);
+		ptr++;
+		if (split && glseg.fracright == 1) SplitRightEdge(ptr);
+		ptr->Set(glseg.x2, zbottom[1], glseg.y2, tcs[LORGT].u, tcs[LORGT].v);
+		ptr++;
+		if (split && !(flags & GLWF_NOSPLITLOWER) && seg->sidedef->numsegs > 1) SplitLowerEdge(ptr);
+		return int(ptr - oo);
+	}
 }
 
 
