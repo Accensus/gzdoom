@@ -465,6 +465,26 @@ MapData *P_OpenMapData(const char * mapname, bool justcheck)
 						index = ML_BEHAVIOR;
 						map->HasBehavior = true;
 					}
+					else if (!stricmp(lumpname, "LM_CELLS"))
+					{
+						index = ML_LM_CELLS;
+					}
+					else if (!stricmp(lumpname, "LM_SUN"))
+					{
+						index = ML_LM_SUN;
+					}
+					else if (!stricmp(lumpname, "LM_SURFS"))
+					{
+						index = ML_LM_SURFS;
+					}
+					else if (!stricmp(lumpname, "LM_TXCRD"))
+					{
+						index = ML_LM_TXCRD;
+					}
+					else if (!stricmp(lumpname, "LM_LMAPS"))
+					{
+						index = ML_LM_LMAPS;
+					}
 					else if (!strnicmp(lumpname, "ENDMAP",8))
 					{
 						return map;
