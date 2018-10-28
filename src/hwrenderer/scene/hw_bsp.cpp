@@ -164,7 +164,7 @@ void HWDrawInfo::AddLine (seg_t *seg, bool portalclip)
 
 	seg->linedef->flags |= ML_MAPPED;
 
-	if (ispoly || seg->linedef->validcount!=validcount) 
+	if (ispoly || seg->linedef->validcount!=validcount || level.LMSurfaces.Size() != 0)
 	{
 		if (!ispoly) seg->linedef->validcount=validcount;
 

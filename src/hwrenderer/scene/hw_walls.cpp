@@ -1499,7 +1499,7 @@ void GLWall::Process(HWDrawInfo *di, seg_t *seg, sector_t * frontsector, sector_
 		v2 = seg->linedef->v1;
 	}
 
-	if (!(seg->sidedef->Flags & WALLF_POLYOBJ))
+	if (!(seg->sidedef->Flags & WALLF_POLYOBJ) && level.LMSurfaces.Size() == 0)
 	{
 		glseg.fracleft = 0;
 		glseg.fracright = 1;
