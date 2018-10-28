@@ -1410,7 +1410,7 @@ struct seg_t
 
 	float			sidefrac;		// relative position of seg's ending vertex on owning sidedef
 
-	LightmapSurface *lightmap;
+	LightmapSurface *lightmap[4];
 
 	int Index() const;
 };
@@ -1462,7 +1462,7 @@ struct subsector_t
 									// 2: has one-sided walls
 	FPortalCoverage	portalcoverage[2];
 
-	LightmapSurface *lightmap;
+	LightmapSurface *lightmap[2];
 };
 
 

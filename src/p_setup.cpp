@@ -4427,12 +4427,31 @@ void P_LoadLightmaps(MapData *map)
 		{
 			auto &subsector = level.subsectors[s->TypeIndex];
 			subsector.firstline->sidedef->sector->HasLightmaps = true;
-			subsector.lightmap = s;
+			subsector.lightmap[s->Type == ST_CEILING ? 1 : 0] = s;
 		}
-		else if (s->Type == ST_MIDDLESEG || s->Type == ST_UPPERSEG || s->Type == ST_LOWERSEG)
+		else if (s->Type == ST_MIDDLESEG)
 		{
-			auto &seg = level.segs[s->TypeIndex];
-			seg.lightmap = s;
+			level.segs[s->TypeIndex].lightmap[1] = s;
+			level.segs[s->TypeIndex].lightmap[2] = s;
+		}
+		else if (s->Type == ST_UPPERSEG)
+		{
+			level.segs[s->TypeIndex].lightmap[0] = s;
+		}
+		else if (s->Type == ST_LOWERSEG)
+		{
+			level.segs[s->TypeIndex].lightmap[3] = s;
+		}
+
+		if (s->Type == ST_MIDDLESEG || s->Type == ST_UPPERSEG || s->Type == ST_LOWERSEG)
+		{
+			// dlight uses triangle strip, gzd uses triangle fan
+			std::swap(level.LMTexCoords[s->FirstVertex + 4], level.LMTexCoords[s->FirstVertex + 6]);
+			std::swap(level.LMTexCoords[s->FirstVertex + 5], level.LMTexCoords[s->FirstVertex + 7]);
+
+			// dlight uses different face winding
+			std::swap(level.LMTexCoords[s->FirstVertex + 2], level.LMTexCoords[s->FirstVertex + 6]);
+			std::swap(level.LMTexCoords[s->FirstVertex + 3], level.LMTexCoords[s->FirstVertex + 7]);
 		}
 	}
 }
