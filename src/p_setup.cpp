@@ -4399,20 +4399,41 @@ void P_LoadLightmaps(MapData *map)
 		{
 			FileReader &fr = map->Reader(ML_LM_TXCRD);
 			fr.Read(&level.LMTexCoords[0], count * sizeof(float));
+			//for (int i = 1; i < count; i += 2)
+			//	level.LMTexCoords[i] = 1.0f - level.LMTexCoords[i];
 		}
 	}
 
 	if (map->Size(ML_LM_LMAPS))
 	{
 		FileReader &fr = map->Reader(ML_LM_LMAPS);
-		int numTextures = fr.ReadInt32();
+		level.LMTexCount = fr.ReadInt32();
 		level.LMTexWidth = fr.ReadInt32();
 		level.LMTexHeight = fr.ReadInt32();
 
-		int size = level.LMTexWidth * level.LMTexHeight * numTextures;
+		int size = level.LMTexWidth * level.LMTexHeight * level.LMTexCount * 3;
 		level.LMTextures.Resize(size);
 		if (size > 0)
 			fr.Read(&level.LMTextures[0], size);
+	}
+
+	// Link surfaces to segs and subsectors
+	for (unsigned int i = 0; i < level.LMSurfaces.Size(); i++)
+	{
+		LightmapSurface *s = &level.LMSurfaces[i];
+		if (s->LightmapNum == 0xffff)
+			continue;
+		if (s->Type == ST_CEILING || s->Type == ST_FLOOR)
+		{
+			auto &subsector = level.subsectors[s->TypeIndex];
+			subsector.firstline->sidedef->sector->HasLightmaps = true;
+			subsector.lightmap = s;
+		}
+		else if (s->Type == ST_MIDDLESEG || s->Type == ST_UPPERSEG || s->Type == ST_LOWERSEG)
+		{
+			auto &seg = level.segs[s->TypeIndex];
+			seg.lightmap = s;
+		}
 	}
 }
 

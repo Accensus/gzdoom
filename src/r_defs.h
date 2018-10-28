@@ -1081,6 +1081,8 @@ public:
 	int				vbocount[2];	// Total count of vertices belonging to this sector's planes. This is used when a sector height changes and also contains all attached planes.
 	int				ibocount;		// number of indices per plane (identical for all planes.) If this is -1 the index buffer is not in use.
 
+	bool HasLightmaps = false; // Sector has lightmaps, IBO cannot be used as each subsector vertex needs its own unique lightmap UV data
+
 	float GetReflect(int pos) { return gl_plane_reflection_i? reflect[pos] : 0; }
 	bool VBOHeightcheck(int pos) const { return vboheight[pos] == GetPlaneTexZ(pos); }
 	FSectorPortalGroup *GetPortalGroup(int plane) { return portals[plane]; }
@@ -1386,6 +1388,7 @@ struct portnode_t
 
 struct FPolyNode;
 struct FMiniBSP;
+struct LightmapSurface;
 
 //
 // The LineSeg.
@@ -1406,6 +1409,8 @@ struct seg_t
 	subsector_t*	Subsector;
 
 	float			sidefrac;		// relative position of seg's ending vertex on owning sidedef
+
+	LightmapSurface *lightmap;
 
 	int Index() const;
 };
@@ -1456,6 +1461,8 @@ struct subsector_t
 	int Index() const;
 									// 2: has one-sided walls
 	FPortalCoverage	portalcoverage[2];
+
+	LightmapSurface *lightmap;
 };
 
 
@@ -1501,6 +1508,16 @@ struct FMiniBSP
 
 
 // Lightmap data
+
+enum SurfaceType
+{
+	ST_UNKNOWN = 0,
+	ST_MIDDLESEG,
+	ST_UPPERSEG,
+	ST_LOWERSEG,
+	ST_CEILING,
+	ST_FLOOR
+};
 
 struct LightmapSurface
 {

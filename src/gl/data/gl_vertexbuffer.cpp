@@ -67,6 +67,7 @@ void FSimpleVertexBuffer::BindVBO()
 	glEnableVertexAttribArray(VATTR_COLOR);
 	glDisableVertexAttribArray(VATTR_VERTEX2);
 	glDisableVertexAttribArray(VATTR_NORMAL);
+	glDisableVertexAttribArray(VATTR_LIGHTMAP);
 }
 
 void FSimpleVertexBuffer::EnableColorArray(bool on)
@@ -156,8 +157,10 @@ void FFlatVertexBuffer::BindVBO()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_id);
 	glVertexAttribPointer(VATTR_VERTEX, 3, GL_FLOAT, false, sizeof(FFlatVertex), &VTO->x);
 	glVertexAttribPointer(VATTR_TEXCOORD, 2, GL_FLOAT, false, sizeof(FFlatVertex), &VTO->u);
+	glVertexAttribPointer(VATTR_LIGHTMAP, 3, GL_FLOAT, false, sizeof(FFlatVertex), &VTO->lu);
 	glEnableVertexAttribArray(VATTR_VERTEX);
 	glEnableVertexAttribArray(VATTR_TEXCOORD);
+	glEnableVertexAttribArray(VATTR_LIGHTMAP);
 	glDisableVertexAttribArray(VATTR_COLOR);
 	glDisableVertexAttribArray(VATTR_VERTEX2);
 	glDisableVertexAttribArray(VATTR_NORMAL);

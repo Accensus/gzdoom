@@ -98,6 +98,7 @@ struct FLevelLocals
 	FVector3 LMSunDirection;
 	TArray<LightmapSurface> LMSurfaces;
 	TArray<float> LMTexCoords;
+	int LMTexCount = 0;
 	int LMTexWidth = 0;
 	int LMTexHeight = 0;
 	TArray<uint8_t> LMTextures;
